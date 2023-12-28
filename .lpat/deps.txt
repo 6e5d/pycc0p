@@ -2,3 +2,5 @@ cc3py
 pycparse
 pyltr
 buildc
+pyc0c
+gid
