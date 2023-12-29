@@ -17,15 +17,15 @@ def build_header(proj):
 	stem = proj.stem
 	header = proj / "include" / f"{stem}.h"
 	d = proj / "build"
-	s = open(header).read()
 	defsu = []
-	j, includes, alias = parse_project_file(s, proj, dict())
+	j, includes, alias = parse_project_file(header, proj, dict())
 	with open(d / f"{stem}.h.ast", "w") as fast:
 		print(dump_flat(j), file = fast)
 		for jj in j:
 			jj = ast2c3(jj)
 			if jj[0] == "fn":
-				assert jj[1].startswith(snake)
+				if not jj[1].startswith(snake):
+					raise Exception(jj[1], snake)
 			else:
 				assert jj[1].startswith(camel)
 				defsu.append(jj)
@@ -42,8 +42,7 @@ def build_c(proj, defsu, alias):
 	):
 		j = []
 		for file in files:
-			s = open(file).read()
-			jj, include, _ = parse_project_file(s, proj, alias)
+			jj, include, _ = parse_project_file(file, proj, alias)
 			j += jj
 			includes += include
 		print(dump_flat(j), file = fast)

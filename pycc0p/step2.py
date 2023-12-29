@@ -67,9 +67,16 @@ def step2(proj):
 			else:
 				print("".join(code), file = fc)
 		for idx, b in enumerate(ltr):
+			if b[0] == "fn":
+				continue
 			code = t.translate(b, False)
-			if sm.isexports[idx] and b[0] != "fn":
+			if sm.isexports[idx]:
 				print("".join(code), file = fh)
 			else:
 				print("".join(code), file = fc)
+		for idx, b in enumerate(ltr):
+			if b[0] != "fn":
+				continue
+			code = t.translate(b, False)
+			print("".join(code), file = fc)
 	return main, links
