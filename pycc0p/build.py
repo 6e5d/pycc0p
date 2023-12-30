@@ -16,9 +16,11 @@ def build_header(proj):
 	snake = gid2c(gid, "snake")
 	stem = proj.stem
 	header = proj / "include" / f"{stem}.h"
+	if not header.exists():
+		return [], [], dict()
 	d = proj / "build"
 	defsu = []
-	j, includes, alias = parse_project_file(header, proj, dict())
+	j, includes, alias = parse_project_file(str(header), proj, dict())
 	with open(d / f"{stem}.h.ast", "w") as fast:
 		print(dump_flat(j), file = fast)
 		for jj in j:
@@ -42,7 +44,7 @@ def build_c(proj, defsu, alias):
 	):
 		j = []
 		for file in files:
-			jj, include, _ = parse_project_file(file, proj, alias)
+			jj, include, _ = parse_project_file(str(file), proj, alias)
 			j += jj
 			includes += include
 		print(dump_flat(j), file = fast)
@@ -72,7 +74,26 @@ def step3(proj, hasmain, links):
 	cmd.append(d / f"{stem}.c")
 	prun(cmd, check = True)
 
+def get_deps(proj):
+	pgid = path2gid(proj)
+	gids = [pgid]
+	depfile = proj / ".lpat/deps.txt"
+	if depfile.exists():
+		for line in open(depfile):
+			if "_" in line:
+				# not c/ccc ns
+				continue
+			path = (proj.parent / line.strip()).resolve()
+			gids.append(path2gid(path))
+	sysfile = proj / ".lpat/syslib.txt"
+	if sysfile.exists():
+		for line in open(sysfile):
+			gids.append(["com", "6e5d", "syslib"] +\
+				line.strip().split("_"))
+	return gids
+
 def buildc0p(proj):
+	gids = get_deps(proj)
 	step1(proj)
-	hasmain, links = step2(proj)
+	hasmain, links = step2(proj, gids)
 	step3(proj, hasmain, links)

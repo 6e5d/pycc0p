@@ -6,21 +6,6 @@ from pycdb.gid2file import gid2file
 
 debug = False
 
-def get_deps(proj):
-	pgid = path2gid(proj)
-	gids = [pgid]
-	depfile = proj / ".lpat/deps.txt"
-	if depfile.exists():
-		for line in open(depfile):
-			path = (proj.parent / line.strip()).resolve()
-			gids.append(path2gid(path))
-	sysfile = proj / ".lpat/syslib.txt"
-	if sysfile.exists():
-		for line in open(sysfile):
-			gids.append(["com", "6e5d", "syslib"] +\
-				line.strip().split("_"))
-	return gids
-
 def build_files(sm):
 	src_includes = []
 	header_includes = []
@@ -35,8 +20,7 @@ def build_files(sm):
 		links += links2
 	return set(src_includes), set(header_includes), set(links)
 
-def step2(proj):
-	gids = get_deps(proj)
+def step2(proj, gids):
 	stem = proj.stem
 	ltr = parse_flat(open(proj / "build" / f"{stem}.c0").read())
 	sm = Symbolman(gids)
