@@ -26,11 +26,6 @@ def build_c(proj):
 	return set(includes)
 
 def step1(proj):
-	cfiles = []
-	for cfile in (proj / "src").iterdir():
-		if cfile.name == "test.c":
-			continue
-		cfiles.append(cfile)
 	build_c(proj)
 
 def buildcc0(proj):
